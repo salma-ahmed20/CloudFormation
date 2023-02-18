@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Creates a VPC with public and private subnets
+Resources:
+  VPC: 
+    Type: AWS::EC2::VPC
+    Properties: 
+      CidrBlock: 192.168.101.0/24
+  PublicSubnetA: 
+    Type: AWS::EC2::Subnet
+    Properties: 
+      AvailabilityZone: "eu-central-1a" 
+      CidrBlock: 192.168.101.0/28
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref VPC
+  PrivateSubnetB: 
+    Type: AWS::EC2::Subnet
+    Properties: 
+      AvailabilityZone: "eu-central-1b"
+      CidrBlock: 192.168.101.32/28
+      MapPublicIpOnLaunch: false
+      VpcId: !Ref VPC
+
+      
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: "SGSalma"
+      GroupDescription: "SSH and HTTp allow"
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: icmp
+          FromPort: 8
+          ToPort: -1
+          CidrIp: 0.0.0.0/0
+
+  EC2Instance:  
+    Type: AWS::EC2::Instance
+    Properties:
+      Tags: 
+        - Key: name
+          Value: salma-yml-ec2 
+      ImageId: "ami-0625948f3a466277f"
+      InstanceType: t2.micro
+      KeyName: "salma_key"
+      SecurityGroupIds: 
+       - !Ref SecurityGroup
+      SubnetId: !Ref PublicSubnetA
